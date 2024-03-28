@@ -18,6 +18,27 @@ cur.execute('''
     )
 ''')
 
+cur.execute("""
+    CREATE TABLE IF NOT EXISTS messages (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        sender_id INTEGER,
+        receiver_id INTEGER,
+        content TEXT,
+        timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+""")
+
+
+cur.execute("""
+    CREATE TABLE IF NOT EXISTS message_user (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        message_id INTEGER,
+        user_id INTEGER,
+        FOREIGN KEY (message_id) REFERENCES messages(id),
+        FOREIGN KEY (user_id) REFERENCES users(id)
+    )
+""")
+
 
 connection.commit()
 connection.close()

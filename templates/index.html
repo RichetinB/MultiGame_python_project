@@ -7,13 +7,48 @@
 </head>
 <body>
     <nav>
-        <a href="/add_user">
-            Register
-        </a>
-    </nav>
-    <h1>Bienvenue sur ma page d'accueil</h1>
-    <p>Ceci est une page d'accueil simple pour mon application Flask.</p>
+        {% if 'username' in session %}
+        <h1>Bienvenue, {{ session['username'] }}!</h1>
+        <p>Contenu spécifique pour les utilisateurs connectés...</p>
+        <a href="/logout">Se déconnecter</a>
+
+    <div>
+        <h1>Envoyer un message</h1>
     
+        <form action="/send_message" method="post">
+            <input type="hidden" name="sender_id" value="1"> <!-- Remplacez la valeur 1 par l'ID de l'utilisateur -->
+            <textarea name="content" placeholder="Message content"></textarea>
+            <button type="submit">Send Message</button>
+        </form>
+        
+        
+    </div>
+
+
+    <div>
+        <h1>
+            Message
+            
+        </h1>
+        <div class="message-list">
+            <ul>
+                {% for message in messages %}
+                    <li>{{ message['content'] }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    {% else %}
+        <h1>Bienvenue sur la page d'accueil</h1>
+        <p>Contenu pour les utilisateurs non connectés...</p>
+        <a href="/login">Se connecter</a>
+        <a href="/add_user">Créer un compte</a>
+
+    {% endif %}
+    
+    </nav>
+
     <!-- Bouton pour naviguer vers /lol_valo -->
     <form action="/lol_valo" method="get">
         <button type="submit">Jouer à LOL ou Valorant</button>

@@ -1,4 +1,5 @@
-from flask import Flask, render_template,request, redirect, url_for, session
+from flask import Flask, render_template,request, redirect, url_for, session, jsonify
+
 import random
 import sqlite3
 
@@ -13,15 +14,50 @@ def get_db_conection():
 
 def add_user(username, email, password_hash):
     c = get_db_conection()
-    req = 'INSERT INTO users (username, password_hash, email) VALUES (?,?,?)'
+    req = 'INSERT INTO users (username, email, password_hash) VALUES (?,?,?)'
     c.execute(req, (username, email, password_hash))
     c.commit()
-    c.close()
+    c.close()   
     
+def get_user(username, password_hash):
+    conn = get_db_conection()
+    user = conn.execute('SELECT * FROM users WHERE username = ? AND password_hash = ?', (username, password_hash)).fetchone()
+    conn.close()
+    return user
+
+
+
+@app.route('/send_message', methods=['POST'])
+def send_message():
+    if request.method == 'POST':
+        sender_id = request.form['sender_id']
+        # receiver_id = request.form['receiver_id']
+        content = request.form['content']
+
+        conn = get_db_conection()
+        cursor = conn.cursor()
+        cursor.execute("INSERT INTO messages (sender_id, content) VALUES (?, ?)", (sender_id, content))
+        conn.commit()
+        conn.close()
+
+        return redirect(url_for('view_messages'))
+
+
+@app.route('/messages')
+def view_messages():
+    conn = get_db_conection()
+    cursor = conn.cursor()
+    messages = cursor.execute("SELECT * FROM messages").fetchall()
+    conn.close()
+
+    return render_template('index.html', messages=messages)
 
 
 @app.route('/')
 def index():
+    # if 'username' in session:
+    #     return f'Bienvenue, {session["username"]}! <a href="/logout">Se déconnecter</a>'
+    # else:
     conn = get_db_conection()
     users = conn.execute('SELECT * FROM users').fetchall()
     conn.close()
@@ -37,25 +73,23 @@ def add_user_route():
         return redirect(url_for('index'))
     return render_template('register.html')
 
-@app.route('/login', methods=['GET','POST'])
+@app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         username = request.form['username']
-        password = request.form['password_hash']
+        password = request.form['password']
         
-        conn = get_db_conection()
-        user = conn.execute('SELECT * FROM users WHERE username = ? AND password_hash = ?', (username, password)).fetchone()
-        conn.close()
+        user = get_user(username, password)
         
         if user:
             session['username'] = user['username']
             return redirect(url_for('index'))
-        
         else:
             error_message = "Nom d'utilisateur ou mot de passe incorrect."
             return render_template('login.html', error_message=error_message)
     
-    return render_template('login.html',error_message=None)
+    return render_template('login.html', error_message=None)
+
 
 @app.route('/logout')
 def logout():
