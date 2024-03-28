@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Page d'accueil</title>
+</head>
+<body>
+    <nav>
+        <a href="/add_user">
+            Register
+        </a>
+    </nav>
+    <h1>Bienvenue sur ma page d'accueil</h1>
+    <p>Ceci est une page d'accueil simple pour mon application Flask.</p>
+    
+    <!-- Bouton pour naviguer vers /lol_valo -->
+    <form action="/lol_valo" method="get">
+        <button type="submit">Jouer à LOL ou Valorant</button>
+    </form>
+    <div>
+        {% if users %}
+            {% for user in users %}
+                <a href="#">
+                    <h2>{{ user['username'] }}</h2>
+                </a>
+                <span class="badge badge-primary">{{ user['email'] }}</span>
+                <hr>
+            {% endfor %}
+        {% else %}
+            <h1>Pas d'utilisateur</h1>
+        {% endif %}
+    </div>
+    
+</body>
+</html>
